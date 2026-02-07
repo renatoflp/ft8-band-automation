@@ -2,9 +2,9 @@
 # Projeto: Automação de Bandas JTDX/WSJT-X
 # Autor: MUNIZ, Renato de Souza - PP5EO
 # Licença: MIT License
-# GitHub: https://github.com/pp5eo/ft8-automacao
+# Repositório Oficial: https://github.com/renatoflp/ft8-band-automation
 #
-# Copyright (c) 2026 PP5EO
+# Copyright (c) 2026 MUNIZ, Renato de Souza - PP5EO
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal

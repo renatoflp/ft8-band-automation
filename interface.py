@@ -46,7 +46,7 @@ class AboutWindow(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Sobre")
-        self.geometry("420x480")
+        self.geometry("450x480")
         self.resizable(False, False)
         self.configure(bg="#ecf0f1")
         self.transient(parent)
@@ -63,12 +63,14 @@ class AboutWindow(tk.Toplevel):
         f_autor = tk.Frame(self, bg="#ecf0f1")
         f_autor.pack(pady=5)
         tk.Label(f_autor, text="Desenvolvido por:", font=("Segoe UI", 10), bg="#ecf0f1").pack()
-        tk.Label(f_autor, text="PP5EO (Renato)", font=("Segoe UI", 12, "bold"), bg="#ecf0f1", fg="#2980b9").pack()
+        
+        # --- NOME ATUALIZADO AQUI ---
+        tk.Label(f_autor, text="MUNIZ, Renato de Souza - PP5EO", font=("Segoe UI", 12, "bold"), bg="#ecf0f1", fg="#2980b9").pack()
 
-        lbl_link = tk.Label(self, text="github.com/pp5eo/ft8-automacao", 
+        lbl_link = tk.Label(self, text="github.com/renatoflp/ft8-band-automation", 
                             font=("Segoe UI", 10, "underline"), bg="#ecf0f1", fg="blue", cursor="hand2")
         lbl_link.pack(pady=10)
-        lbl_link.bind("<Button-1>", lambda e: self._abrir_link("https://github.com/pp5eo/ft8-automacao"))
+        lbl_link.bind("<Button-1>", lambda e: self._abrir_link("https://github.com/renatoflp/ft8-band-automation"))
         ToolTip(lbl_link, "Clique para ver o código fonte e atualizações")
 
         f_lic = tk.LabelFrame(self, text="Licença & Aviso Legal", bg="#ecf0f1", padx=10, pady=10)
@@ -135,19 +137,16 @@ class GuiBuilder:
         f_header = tk.Frame(self.root, bg="#2c3e50", pady=15, padx=15)
         f_header.pack(fill="x")
         
-        # --- LADO ESQUERDO: Status ---
         f_conn = tk.Frame(f_header, bg="#2c3e50")
-        f_conn.pack(side="left") # Pack Esquerda
+        f_conn.pack(side="left")
         
         self.lbl_flrig = tk.Label(f_conn, text="FLRIG", font=("Segoe UI", 8, "bold"), bg="#7f8c8d", fg="white", width=10)
         self.lbl_flrig.pack(pady=1)
         self.lbl_jtdx = tk.Label(f_conn, text="WSJT/JTDX", font=("Segoe UI", 8, "bold"), bg="#7f8c8d", fg="white", width=10)
         self.lbl_jtdx.pack(pady=1)
         
-        # --- LADO DIREITO: Botões de Controle ---
-        # Pack Direita (fazemos isso antes do centro para garantir o espaço)
         f_btns = tk.Frame(f_header, bg="#2c3e50")
-        f_btns.pack(side="right") 
+        f_btns.pack(side="right")
 
         btn_config = {'width': 12, 'height': 1, 'relief': "flat", 'cursor': "hand2", 'font': ("Segoe UI", 9, "bold")}
         
@@ -167,14 +166,11 @@ class GuiBuilder:
                                    command=self.app.toggle_pause, **btn_config)
         self.btn_pause.grid(row=1, column=1, padx=2, pady=2)
 
-        # --- CENTRO: Timer e Banda ---
-        # Pack Left + Fill Both + Expand faz ele ocupar todo o espaço restante no meio
         f_info = tk.Frame(f_header, bg="#2c3e50")
         f_info.pack(side="left", fill="both", expand=True)
         
-        # Frame interno centralizado
         f_center_inner = tk.Frame(f_info, bg="#2c3e50")
-        f_center_inner.pack(expand=True) # Defaults to center anchor
+        f_center_inner.pack(expand=True)
         
         tk.Label(f_center_inner, text="PRÓXIMA TROCA EM", font=("Segoe UI", 10, "bold"), bg="#2c3e50", fg="#bdc3c7").pack()
         
@@ -221,7 +217,6 @@ class GuiBuilder:
         self.f_bandas_container = tk.Frame(parent, bg=self.cor_fundo)
         self.f_bandas_container.pack(fill="both", expand=True, pady=5)
         
-        # --- HEADER DO ACORDEÃO ---
         f_toggle = tk.Frame(self.f_bandas_container, bg="#bdc3c7", relief="raised", borderwidth=1)
         f_toggle.pack(fill="x")
         
@@ -231,7 +226,6 @@ class GuiBuilder:
                                       font=("Segoe UI", 9, "bold"), cursor="hand2")
         self.btn_expandir.pack(fill="x")
         
-        # --- CONTEÚDO (SCROLLABLE FRAME) ---
         self.frame_externo = tk.Frame(self.f_bandas_container, bg=self.cor_fundo, relief="solid", borderwidth=1)
         
         self.canvas = tk.Canvas(self.frame_externo, bg=self.cor_fundo, highlightthickness=0, height=250)
@@ -286,7 +280,6 @@ class GuiBuilder:
             e.bind("<FocusOut>", lambda event, v=vw: self._validar_watchlist_ao_sair(event, v))
             e.bind("<KeyRelease>", lambda event, b=banda: self.app.atualizar_watch_realtime(b))
             
-            # Scrollwheel support
             for widget in [lbl_b, e]:
                 widget.bind("<MouseWheel>", self._on_mousewheel)
         
