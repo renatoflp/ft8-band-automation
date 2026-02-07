@@ -1,4 +1,4 @@
-# 📡 Automação de Bandas para WSJT-X / JTDX (Via FLRIG)
+# Automação de Bandas para WSJT-X / JTDX (Via FLRIG)
 
 **Desenvolvido por: MUNIZ, Renato de Souza - PP5EO** *Licença: MIT (Código Aberto)*
 **Repositório Oficial:** [github.com/renatoflp/ft8-band-automation](https://github.com/renatoflp/ft8-band-automation)
@@ -7,7 +7,7 @@ Este software é um utilitário de automação para radioamadores que operam mod
 
 ---
 
-## ⚠️ ISENÇÃO DE RESPONSABILIDADE (DISCLAIMER)
+## ISENÇÃO DE RESPONSABILIDADE (DISCLAIMER)
 
 **LEIA COM ATENÇÃO ANTES DE USAR:**
 
@@ -21,7 +21,7 @@ Este software é fornecido **"COMO ESTÁ" (AS IS)**, sem garantias de qualquer t
 
 ---
 
-## 🚀 Funcionalidades
+## Funcionalidades
 
 
 * **Monitoramento Passivo:** Escuta o tráfego UDP local do WSJT-X/JTDX sem interferir na operação.
@@ -32,12 +32,12 @@ Este software é fornecido **"COMO ESTÁ" (AS IS)**, sem garantias de qualquer t
 
 ---
 
-## 📘 Documentação
+## Documentação
 Para instruções detalhadas de operação, consulte o [Manual Completo do Usuário](MANUAL.md).
 
 ---
 
-## 🛠️ Pré-requisitos
+## Pré-requisitos
 
 1.  **Python 3.x** instalado.
 2.  **FLRIG** instalado e configurado com seu rádio (CAT Control funcionando).
@@ -45,7 +45,7 @@ Para instruções detalhadas de operação, consulte o [Manual Completo do Usuá
 
 ---
 
-## ⚙️ Configuração Obrigatória
+## Configuração Obrigatória
 
 Para que o sistema funcione, você precisa configurar os softwares da seguinte forma:
 
@@ -67,7 +67,7 @@ O software precisa enviar os dados de decodificação para o nosso script.
 
 ---
 
-## 📦 Como Instalar e Rodar
+## Como Instalar e Rodar
 
 1.  Baixe ou clone este repositório.
 2.  Instale o Python (se não tiver).
@@ -85,7 +85,7 @@ O software precisa enviar os dados de decodificação para o nosso script.
 
 ---
 
-## 📝 Personalização
+## Personalização
 
 Clique no botão **⚙ CONFIG** na interface para ajustar:
 * **Intervalo:** Tempo de permanência em cada banda.
@@ -94,6 +94,7 @@ Clique no botão **⚙ CONFIG** na interface para ajustar:
 
 ---
 
-## 📄 Licença
+## Licença
+
 
 Este projeto é distribuído sob a licença **MIT**. Veja o arquivo `LICENSE` para mais detalhes.
