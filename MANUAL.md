@@ -1,4 +1,4 @@
-\# 📘 Manual do Usuário - Automação de Bandas FT8 (PP5EO)
+\#  Manual do Usuário - Automação de Bandas FT8 (PP5EO)
 
 
 
@@ -163,4 +163,5 @@ Esta é a função mais importante para evitar acidentes.
 \* Verifique se o botão "PAUSAR" não está ativo.
 
 \* Verifique se não está em modo "DELAY" (após uma transmissão).
+
 
