@@ -23,11 +23,17 @@ Este software é fornecido **"COMO ESTÁ" (AS IS)**, sem garantias de qualquer t
 
 ## 🚀 Funcionalidades
 
+
 * **Monitoramento Passivo:** Escuta o tráfego UDP local do WSJT-X/JTDX sem interferir na operação.
 * **Troca Automática de Bandas:** Se passar um tempo (ex: 5 min) sem atividade ou contatos na banda atual, o software troca automaticamente para a próxima banda da lista.
 * **Ciclo Dia / Noite:** Permite definir quais bandas usar durante o dia (ex: 10m, 15m, 20m) e durante a noite (ex: 40m, 80m).
 * **Watchlist:** Alerta visual quando um indicativo de interesse é decodificado.
 * **Integração FLRIG:** Compatível com qualquer rádio suportado pelo FLRIG (Icom, Yaesu, Kenwood, Xiegu, etc.).
+
+---
+
+## 📘 Documentação
+Para instruções detalhadas de operação, consulte o [Manual Completo do Usuário](MANUAL.md).
 
 ---
 
