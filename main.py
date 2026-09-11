@@ -28,7 +28,6 @@
 import tkinter as tk
 import datetime
 import time
-import winsound
 
 from config import FREQUENCIAS, JTDX_UDP_PORT
 from monitor import JTDXMonitor
@@ -41,19 +40,17 @@ class AppJTDX:
     def __init__(self, root):
         self.root = root
         self.root.title("PP5EO | Monitor & Auto Band Switch")
-        self.root.geometry("780x700")
+        self.root.geometry("")
         self.root.protocol("WM_DELETE_WINDOW", self.fechar_app)
         
         self.dados_config = ConfigManager.carregar()
         
         self.vars_dia = {}
         self.vars_noite = {}
-        self.vars_watchlist = {}
         
         self.var_intervalo = tk.StringVar(value=self.dados_config.get("intervalo", "10 min"))
         self.var_inicio_dia = tk.StringVar(value=self.dados_config.get("inicio_dia", "07:00"))
         self.var_fim_dia = tk.StringVar(value=self.dados_config.get("fim_dia", "18:30"))
-        self.var_mudo = tk.BooleanVar(value=self.dados_config.get("audio_mudo", False))
         self.var_delay_tx = tk.StringVar(value=str(self.dados_config.get("delay_pos_tx", "300")))
         
         self.var_udp_ip = tk.StringVar(value=self.dados_config.get("jtdx_udp_ip", "224.0.0.1"))
@@ -70,8 +67,6 @@ class AppJTDX:
         self.current_band_index = -1
         self.banda_atual_nome = "---"
         self.ultimo_ciclo_sync = 0 
-        self.ultimo_alerta_time = 0
-        self.tag_cor_atual = 'ciclo_claro'
         
         self.flrig = FLRIGClient()
         
@@ -87,6 +82,13 @@ class AppJTDX:
     def abrir_tela_config(self):
         SettingsWindow(self.root, self)
 
+    def pular_para_proxima_banda(self):
+        print("[MANUAL] Forçando próxima troca de banda...")
+        self.trocar_banda() 
+        agora = time.time()
+        self.last_band_change = agora
+        self.ultimo_ciclo_sync = agora
+
     def forcar_mudanca_banda(self, nome_banda):
         print(f"Comando Manual: Mudando para {nome_banda}")
         freq = FREQUENCIAS.get(nome_banda)
@@ -99,7 +101,6 @@ class AppJTDX:
                 if nome_banda in lista_ativa:
                     self.current_band_index = lista_ativa.index(nome_banda)
                 self.gui.lbl_banda_grande.config(text=nome_banda)
-                self.atualizar_watch_realtime(nome_banda)
 
     def sincronizar_radio_inicio(self):
         freq_atual = self.monitor.current_freq
@@ -118,26 +119,11 @@ class AppJTDX:
                     self.banda_atual_nome = banda_detectada
                     self.last_band_change = time.time()
                     self.gui.lbl_banda_grande.config(text=banda_detectada)
-                    self.atualizar_watch_realtime(banda_detectada)
                     print(f"Sincronia Inicial: {banda_detectada}")
                 except: pass
 
     def receber_alerta_dx(self, remetente, modo, mensagem, horario, dados_tecnicos):
-        self.root.after(0, lambda: self._processar_alerta_gui(remetente, modo, mensagem, horario))
-
-    def _processar_alerta_gui(self, remetente, modo, mensagem, horario):
-        if not self.var_mudo.get():
-            try: winsound.Beep(2000, 100)
-            except: pass
-        tv = self.gui.tree_alertas
-        agora = time.time()
-        if (agora - self.ultimo_alerta_time) > 2.5:
-            if self.tag_cor_atual == 'ciclo_claro': self.tag_cor_atual = 'ciclo_escuro'
-            else: self.tag_cor_atual = 'ciclo_claro'
-        self.ultimo_alerta_time = agora
-        tv.insert("", 0, values=(horario, self.banda_atual_nome, modo, mensagem), tags=(self.tag_cor_atual,))
-        filhos = tv.get_children()
-        if len(filhos) > 100: tv.delete(filhos[-1])
+        pass
 
     def loop_automacao(self):
         agora = time.time()
@@ -145,14 +131,15 @@ class AppJTDX:
         flrig_ok = (ptt is not None)
         
         if flrig_ok:
-            self.gui.lbl_flrig.config(bg="#27ae60", text="✔ FLRIG ON")
+            self.gui.lbl_flrig.config(bg="#27ae60", text="FLRIG" if self.gui.modo_compacto else "✔ FLRIG ON")
         else:
-            self.gui.lbl_flrig.config(bg="#c0392b", text="✖ FLRIG OFF")
+            self.gui.lbl_flrig.config(bg="#c0392b", text="FLRIG" if self.gui.modo_compacto else "✖ FLRIG OFF")
 
-        if (agora - self.monitor.last_packet_time) < 15:
-            self.gui.lbl_jtdx.config(bg="#27ae60", text="✔ WSJT DATA")
+        jtdx_ok = (agora - self.monitor.last_packet_time) < 15
+        if jtdx_ok:
+            self.gui.lbl_jtdx.config(bg="#27ae60", text="WSJT" if self.gui.modo_compacto else "✔ WSJT DATA")
         else:
-            self.gui.lbl_jtdx.config(bg="#f39c12", text="⚠ WSJT WAIT")
+            self.gui.lbl_jtdx.config(bg="#f39c12", text="WSJT" if self.gui.modo_compacto else "⚠ WSJT WAIT")
 
         if flrig_ok and ptt == 1:
             self.gui.lbl_status_geral.config(text="TRANSMITINDO (TX)", bg="#c0392b", fg="white")
@@ -207,7 +194,6 @@ class AppJTDX:
             lista_ativa, _ = self.get_lista_bandas_ativa()
             if banda_real in lista_ativa:
                 self.current_band_index = lista_ativa.index(banda_real)
-            self.atualizar_watch_realtime(banda_real)
             self.gui.lbl_banda_grande.config(text=banda_real)
 
     def get_lista_bandas_ativa(self):
@@ -236,8 +222,6 @@ class AppJTDX:
             
             if self.flrig.set_frequency(freq):
                 self.banda_atual_nome = nova_banda
-                txt_watch = self.vars_watchlist[nova_banda].get().upper()
-                self.monitor.update_watchlist(txt_watch)
 
     def salvar_automatico(self, event=None):
         dados = ConfigManager.carregar()
@@ -252,10 +236,8 @@ class AppJTDX:
             "inicio_dia": self.var_inicio_dia.get(),
             "fim_dia": self.var_fim_dia.get(),
             "delay_pos_tx": self.var_delay_tx.get(),
-            "audio_mudo": self.var_mudo.get(),
             "bandas_dia": [b for b, v in self.vars_dia.items() if v.get()],
-            "bandas_noite": [b for b, v in self.vars_noite.items() if v.get()],
-            "watchlists": {b: v.get().upper() for b, v in self.vars_watchlist.items()}
+            "bandas_noite": [b for b, v in self.vars_noite.items() if v.get()]
         })
         ConfigManager.salvar(dados)
         
@@ -270,16 +252,12 @@ class AppJTDX:
             self.last_network_config["ip"] = ip_novo
             self.last_network_config["port"] = port_nova
 
-        if self.banda_atual_nome in self.vars_watchlist:
-            self.monitor.update_watchlist(self.vars_watchlist[self.banda_atual_nome].get())
-
-    def atualizar_watch_realtime(self, banda):
-        if self.banda_atual_nome == banda:
-            self.monitor.update_watchlist(self.vars_watchlist[banda].get().upper())
-
     def toggle_pause(self):
         self.automacao_ativa = not self.automacao_ativa
-        txt = "RETOMAR" if not self.automacao_ativa else "PAUSAR"
+        if self.gui.modo_compacto:
+            txt = "▶" if not self.automacao_ativa else "⏸"
+        else:
+            txt = "RETOMAR" if not self.automacao_ativa else "PAUSAR"
         self.gui.btn_pause.config(text=txt)
 
     def get_segundos(self):
