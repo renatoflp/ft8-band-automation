@@ -83,7 +83,8 @@ class AppJTDX:
         SettingsWindow(self.root, self)
 
     def pular_para_proxima_banda(self):
-        print("[MANUAL] Forçando próxima troca de banda...")
+        print("[MANUAL] Forçando próxima troca de banda e cancelando delay...")
+        self.last_tx_time = 0  # Zera o timer do TX para cancelar o modo DELAY
         self.trocar_banda() 
         agora = time.time()
         self.last_band_change = agora
