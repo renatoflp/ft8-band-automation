@@ -93,9 +93,24 @@ class GuiBuilder:
         self.app = app_controller 
         self.cor_fundo = "#f4f6f7"
         self.modo_compacto = False
+
+        # Variáveis para o arraste da janela
+        self._offsetx = 0
+        self._offsety = 0
         
         self.configurar_estilos()
         self.construir_layout()
+
+    def iniciar_arraste(self, event):
+        if self.modo_compacto and not isinstance(event.widget, tk.Button):
+            self._offsetx = event.x_root - self.root.winfo_rootx()
+            self._offsety = event.y_root - self.root.winfo_rooty()
+
+    def arrastar_janela(self, event):
+        if self.modo_compacto and not isinstance(event.widget, tk.Button):
+            x = event.x_root - self._offsetx
+            y = event.y_root - self._offsety
+            self.root.geometry(f"+{x}+{y}")
 
     def configurar_estilos(self):
         self.root.configure(bg=self.cor_fundo)
@@ -119,14 +134,18 @@ class GuiBuilder:
         self._criar_selecao_bandas(self.f_main)
         self._criar_footer()
         
+        # Mapeia os eventos de clique e arrasto para a janela inteira
+        self.root.bind_all("<ButtonPress-1>", self.iniciar_arraste)
+        self.root.bind_all("<B1-Motion>", self.arrastar_janela)
+
         self.root.update_idletasks()
         self.root.geometry("") 
 
     def _criar_header(self):
-        f_header = tk.Frame(self.root, bg="#2c3e50", pady=15, padx=15)
-        f_header.pack(fill="x")
+        self.f_header = tk.Frame(self.root, bg="#2c3e50", pady=15, padx=15)
+        self.f_header.pack(fill="x")
         
-        f_conn = tk.Frame(f_header, bg="#2c3e50")
+        f_conn = tk.Frame(self.f_header, bg="#2c3e50")
         f_conn.pack(side="left")
         
         self.lbl_flrig = tk.Label(f_conn, text="FLRIG", font=("Segoe UI", 8, "bold"), bg="#7f8c8d", fg="white", width=10)
@@ -134,7 +153,7 @@ class GuiBuilder:
         self.lbl_jtdx = tk.Label(f_conn, text="WSJT/JTDX", font=("Segoe UI", 8, "bold"), bg="#7f8c8d", fg="white", width=10)
         self.lbl_jtdx.pack(pady=1)
         
-        f_btns = tk.Frame(f_header, bg="#2c3e50")
+        f_btns = tk.Frame(self.f_header, bg="#2c3e50")
         f_btns.pack(side="right")
 
         btn_config = {'width': 12, 'height': 1, 'relief': "flat", 'cursor': "hand2", 'font': ("Segoe UI", 9, "bold")}
@@ -160,13 +179,14 @@ class GuiBuilder:
         self.btn_mini.grid(row=0, column=2, rowspan=2, padx=2, pady=2, sticky="ns")
         ToolTip(self.btn_mini, "Modo Compacto (Sempre no Topo)")
 
-        f_info = tk.Frame(f_header, bg="#2c3e50")
+        f_info = tk.Frame(self.f_header, bg="#2c3e50")
         f_info.pack(side="left", fill="both", expand=True)
         
         f_center_inner = tk.Frame(f_info, bg="#2c3e50")
         f_center_inner.pack(expand=True)
         
-        tk.Label(f_center_inner, text="PRÓXIMA TROCA EM", font=("Segoe UI", 10, "bold"), bg="#2c3e50", fg="#bdc3c7").pack()
+        self.lbl_proxima_troca = tk.Label(f_center_inner, text="PRÓXIMA TROCA EM", font=("Segoe UI", 10, "bold"), bg="#2c3e50", fg="#bdc3c7")
+        self.lbl_proxima_troca.pack()
         
         self.lbl_timer = tk.Label(f_center_inner, text="--:--", font=("Consolas", 28, "bold"), bg="#2c3e50", fg="#f1c40f")
         self.lbl_timer.pack()
@@ -217,9 +237,27 @@ class GuiBuilder:
         self.modo_compacto = not self.modo_compacto
         
         if self.modo_compacto:
+            self.root.withdraw() # Oculta a janela rapidamente
             self.root.attributes('-topmost', True) 
+            self.root.overrideredirect(True) 
+            self.root.update_idletasks()
+            
+            # --- Correção para Windows: Manter em apenas uma Área de Trabalho ---
+            try:
+                import ctypes
+                hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+                style = ctypes.windll.user32.GetWindowLongW(hwnd, -20) # -20 é o GWL_EXSTYLE
+                style = (style & ~0x00000080) | 0x00040000 # Remove WS_EX_TOOLWINDOW e adiciona WS_EX_APPWINDOW
+                ctypes.windll.user32.SetWindowLongW(hwnd, -20, style)
+            except:
+                pass
+            # --------------------------------------------------------------------
+            
             self.f_main.pack_forget() 
             self.f_footer.pack_forget() 
+            
+            self.f_header.config(pady=3, padx=10)
+            self.lbl_proxima_troca.config(font=("Segoe UI", 7, "bold"))
             
             self.lbl_timer.config(font=("Consolas", 16, "bold"))
             self.lbl_banda_grande.config(font=("Segoe UI", 9, "bold"))
@@ -233,14 +271,20 @@ class GuiBuilder:
             self.lbl_flrig.config(width=5, text="FLRIG")
             self.lbl_jtdx.config(width=5, text="WSJT")
             
-            self.btn_mini.config(text="🗖") 
+            self.btn_mini.config(text="📌") 
             self.root.geometry("") 
+            self.root.deiconify() # Traz a janela de volta com o estilo corrigido
             
         else:
+            self.root.withdraw() # Oculta a janela rapidamente
             self.root.attributes('-topmost', False)
+            self.root.overrideredirect(False) 
             
             self.f_main.pack(fill="both", expand=True, padx=15, pady=15)
             self.f_footer.pack(fill="x", side="bottom")
+            
+            self.f_header.config(pady=15, padx=15)
+            self.lbl_proxima_troca.config(font=("Segoe UI", 10, "bold"))
             
             self.lbl_timer.config(font=("Consolas", 28, "bold"))
             self.lbl_banda_grande.config(font=("Segoe UI", 12, "bold"))
@@ -256,3 +300,4 @@ class GuiBuilder:
             
             self.btn_mini.config(text="📌")
             self.root.geometry("")
+            self.root.deiconify() # Traz a janela de volta com a barra de título
